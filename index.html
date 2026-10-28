@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Idra Tech</title>
+<meta name="description" content="Idra Tech progetta e costruisce piscine residenziali e impianti di irrigazione, e li segue con la manutenzione.">
+<link rel="icon" href="icona.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Direzione: l'acqua come materiale. Navy profondo e bianco, un solo azzurro per l'acqua, il verde solo dove c'è prato.
+     Titoli enormi e corti in Sora, superfici "a doppio bordo" come piastrelle di una vasca. */
+  :root {
+    --abyss: #061A2C;
+    --navy: #0B2C4A;
+    --aqua: #00B4D8;
+    --foam: #EAF4F6;
+    --tile: #F6FAFB;
+    --lawn: #4C9A68;
+    --ink: #0B2C4A;
+    --mute: #5B7183;
+    --line: rgba(11,44,74,.08);
+    --display: 'Sora', system-ui, sans-serif;
+    --body: 'Instrument Sans', system-ui, sans-serif;
+    --ease: cubic-bezier(.32,.72,0,1);
+    --gut: max(20px, env(safe-area-inset-left, 0px));
+    --max: 1280px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font: 400 17px/1.6 var(--body); color: var(--ink); background: var(--tile); }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--aqua); outline-offset: 3px; border-radius: 8px; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+  p { margin: 0; }
+  .wrap { max-width: var(--max); margin: 0 auto; padding-left: var(--gut); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+
+  /* pulsante a pillola con icona annidata */
+  .pill { display: inline-flex; align-items: center; gap: 14px; padding: 7px 7px 7px 24px; border-radius: 999px; border: 0; cursor: pointer;
+          font: 600 15px var(--body); text-decoration: none; transition: transform .5s var(--ease), background .5s var(--ease); }
+  .pill .ic { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; transition: transform .6s var(--ease); }
+  .pill .ic svg { width: 15px; height: 15px; }
+  .pill:hover .ic { transform: translate(2px,-1px) scale(1.06); }
+  .pill:active { transform: scale(.98); }
+  .pill-aqua { background: var(--aqua); color: var(--abyss); }
+  .pill-aqua .ic { background: var(--abyss); color: #fff; }
+  .pill-white { background: #fff; color: var(--navy); }
+  .pill-white .ic { background: var(--navy); color: #fff; }
+  .pill-navy { background: var(--navy); color: #fff; }
+  .pill-navy .ic { background: var(--aqua); color: var(--abyss); }
+  .ghost { color: #fff; text-decoration: none; font-weight: 500; padding: 12px 4px; border-bottom: 1px solid rgba(255,255,255,.4); transition: border-color .4s var(--ease); }
+  .ghost:hover { border-color: #fff; }
+
+  /* ---------- isola di navigazione ---------- */
+  .island { position: fixed; z-index: 20; top: calc(16px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%);
+            width: min(calc(100% - 32px), 1180px); display: flex; align-items: center; justify-content: space-between; gap: 20px;
+            padding: 8px 8px 8px 24px; border-radius: 999px; background: rgba(6,26,44,.38); backdrop-filter: blur(18px) saturate(1.3);
+            -webkit-backdrop-filter: blur(18px) saturate(1.3); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); transition: background .6s var(--ease); }
+  .island.solid { background: rgba(6,26,44,.86); }
+  .island .logo { display: block; }
+  .island .logo img { height: 30px; width: auto; }
+  .links { display: flex; align-items: center; gap: 30px; color: #fff; font-size: 15px; font-weight: 500; }
+  .links a:not(.pill) { text-decoration: none; opacity: .85; transition: opacity .3s var(--ease); }
+  .links a:not(.pill):hover { opacity: 1; }
+  .burger { display: none; position: relative; width: 46px; height: 46px; border: 0; border-radius: 50%; background: rgba(255,255,255,.12); cursor: pointer; }
+  .burger span { position: absolute; left: 14px; right: 14px; height: 1.5px; background: #fff; border-radius: 2px; transition: transform .6s var(--ease), top .6s var(--ease); }
+  .burger span:first-child { top: 19px; } .burger span:last-child { top: 26px; }
+  .menu-open .burger span:first-child { top: 22.5px; transform: rotate(45deg); }
+  .menu-open .burger span:last-child { top: 22.5px; transform: rotate(-45deg); }
+  .sheet { position: fixed; inset: 0; z-index: 15; background: rgba(6,26,44,.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+           display: flex; flex-direction: column; justify-content: flex-end; gap: 6px;
+           padding: 120px max(28px, env(safe-area-inset-right, 0px)) calc(40px + env(safe-area-inset-bottom, 0px)) max(28px, env(safe-area-inset-left, 0px));
+           opacity: 0; pointer-events: none; transition: opacity .5s var(--ease); }
+  .sheet a { color: #fff; text-decoration: none; font: 600 40px/1.25 var(--display); letter-spacing: -.03em; transform: translateY(40px); opacity: 0;
+             transition: transform .8s var(--ease), opacity .8s var(--ease); }
+  .sheet .pill { font: 600 16px var(--body); letter-spacing: 0; align-self: flex-start; margin-top: 28px; }
+  .sheet small { color: rgba(255,255,255,.55); font-size: 14px; margin-top: 18px; opacity: 0; transition: opacity .8s var(--ease) .4s; }
+  .menu-open .sheet { opacity: 1; pointer-events: auto; }
+  .menu-open .sheet a { transform: none; opacity: 1; }
+  .menu-open .sheet small { opacity: 1; }
+  .sheet a:nth-child(2) { transition-delay: .05s; } .sheet a:nth-child(3) { transition-delay: .1s; } .sheet a:nth-child(4) { transition-delay: .15s; } .sheet a:nth-child(5) { transition-delay: .2s; }
+
+  /* ---------- apertura ---------- */
+  .hero { position: relative; min-height: min(100dvh, 980px); display: flex; align-items: flex-end; color: #fff; background: var(--abyss); overflow: hidden; }
+  .hero > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; animation: settle 2.4s var(--ease) both; }
+  .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,26,44,.5) 0%, rgba(6,26,44,0) 28%, rgba(6,26,44,.15) 50%, rgba(6,26,44,.86) 100%); }
+  .hero .wrap { position: relative; z-index: 1; width: 100%; padding-top: 160px; padding-bottom: 56px; display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 48px; }
+  .hero h1 { font-size: clamp(52px, 7.4vw, 112px); line-height: .9; font-weight: 600; letter-spacing: -.055em; }
+  .hero h1 span { display: block; animation: rise 1.2s var(--ease) both; }
+  .hero h1 span + span { animation-delay: .12s; color: var(--aqua); }
+  .hero .side { max-width: 360px; display: grid; gap: 26px; padding-bottom: 12px; animation: rise 1.2s var(--ease) .3s both; }
+  .hero .side p { font-size: 18px; line-height: 1.55; color: rgba(255,255,255,.88); }
+  .hero .row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  @keyframes rise { from { transform: translateY(40px); } }
+  @keyframes settle { from { transform: scale(1.08); } }
+
+  .ribbon { background: var(--abyss); color: rgba(255,255,255,.72); font-size: 15px; }
+  .ribbon .wrap { display: flex; flex-wrap: wrap; gap: 14px 48px; padding-top: 22px; padding-bottom: 22px; border-top: 1px solid rgba(255,255,255,.1); }
+  .ribbon b { color: #fff; font-weight: 600; }
+
+  /* ---------- servizi: bento ---------- */
+  section { padding: 128px 0; }
+  .intro { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: end; margin-bottom: 64px; }
+  .intro h2, .h2 { font-size: clamp(38px, 5.4vw, 76px); line-height: .98; font-weight: 600; letter-spacing: -.045em; }
+  .intro p { color: var(--mute); font-size: 18px; max-width: 46ch; }
+
+  .shell { padding: 6px; border-radius: 32px; background: rgba(11,44,74,.04); box-shadow: inset 0 0 0 1px var(--line); }
+  .core { border-radius: 26px; overflow: hidden; background: #fff; box-shadow: inset 0 1px 1px rgba(255,255,255,.6), 0 30px 60px -40px rgba(11,44,74,.25); height: 100%; }
+
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+  .b-pool { grid-column: span 7; grid-row: span 2; }
+  .b-irr { grid-column: span 5; grid-row: span 2; }
+  .b-care, .b-smart, .b-fast { grid-column: span 4; }
+  .tilecard { position: relative; display: flex; flex-direction: column; justify-content: flex-end; min-height: 620px; color: #fff; }
+  .tilecard img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.4s var(--ease); }
+  .tilecard:hover img { transform: scale(1.04); }
+  .tilecard::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,26,44,0) 35%, rgba(6,26,44,.88) 100%); }
+  .tilecard .txt { position: relative; z-index: 1; padding: 36px; display: grid; gap: 14px; }
+  .tilecard h3 { font-size: clamp(30px, 3vw, 44px); line-height: 1; font-weight: 600; letter-spacing: -.04em; }
+  .tilecard p { color: rgba(255,255,255,.84); max-width: 44ch; }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+  .tags span { font-size: 13px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+  .b-irr .tags span { background: rgba(76,154,104,.32); }
+  .small { padding: 30px; display: grid; gap: 12px; align-content: start; min-height: 230px; }
+  .small svg { width: 34px; height: 34px; color: var(--aqua); margin-bottom: 18px; }
+  .small h3 { font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+  .small p { color: var(--mute); font-size: 16px; }
+  .b-fast .core { background: var(--navy); color: #fff; }
+  .b-fast .num { font: 300 76px/1 var(--display); letter-spacing: -.06em; color: var(--aqua); }
+  .b-fast p { color: rgba(255,255,255,.75); }
+
+  /* ---------- metodo ---------- */
+  .method { background: var(--foam); }
+  .steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: s; }
+  .steps li { counter-increment: s; }
+  .steps .core { padding: 30px 28px 34px; display: grid; gap: 12px; align-content: start; min-height: 280px; }
+  .steps .core::before { content: "0" counter(s); font: 300 15px var(--display); color: var(--mute); padding-bottom: 54px;
+                         background: linear-gradient(var(--aqua), var(--aqua)) 0 34px / 28px 2px no-repeat; }
+  .steps h3 { font-size: 23px; font-weight: 600; letter-spacing: -.02em; }
+  .steps p { color: var(--mute); font-size: 16px; }
+
+  /* ---------- lavori: striscia orizzontale ---------- */
+  .work { padding-bottom: 96px; }
+  .work .intro { margin-bottom: 40px; }
+  .strip { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(280px, 34vw, 460px); gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory;
+           padding: 0 max(20px, calc((100vw - var(--max)) / 2 + 20px)) 24px; scrollbar-width: thin; scrollbar-color: rgba(11,44,74,.25) transparent; }
+  .strip figure { margin: 0; scroll-snap-align: start; }
+  .strip .core { position: relative; aspect-ratio: 4 / 5; }
+  .strip img { width: 100%; height: 100%; object-fit: cover; }
+  .strip figcaption { position: absolute; left: 12px; right: 12px; bottom: 12px; padding: 14px 18px; border-radius: 18px; background: rgba(255,255,255,.94);
+                      display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; color: var(--mute); }
+  .strip figcaption b { color: var(--ink); font-size: 16px; font-weight: 600; }
+  .note { font-size: 14px; color: var(--mute); }
+  .strip-nav { display: flex; gap: 10px; }
+  .strip-nav button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: #fff; box-shadow: inset 0 0 0 1px var(--line); color: var(--navy); cursor: pointer;
+                      display: grid; place-items: center; transition: transform .5s var(--ease), background .5s var(--ease); }
+  .strip-nav button:hover { background: var(--navy); color: #fff; }
+  .strip-nav button:active { transform: scale(.95); }
+  .strip-nav svg { width: 18px; height: 18px; }
+
+  /* ---------- contatti ---------- */
+  .contact { background: var(--abyss); color: #fff; position: relative; overflow: hidden; }
+  .contact::before { content: ""; position: absolute; width: 900px; height: 900px; right: -300px; top: -380px; border-radius: 50%;
+                     background: radial-gradient(circle, rgba(0,180,216,.22), rgba(0,180,216,0) 65%); }
+  .contact .wrap { position: relative; display: grid; grid-template-columns: 1fr 1.05fr; gap: 72px; align-items: start; }
+  .contact .h2 { margin-bottom: 26px; }
+  .contact .lead { color: rgba(255,255,255,.75); font-size: 18px; max-width: 42ch; }
+  .facts { margin: 48px 0 0; display: grid; gap: 0; }
+  .facts div { display: flex; justify-content: space-between; gap: 20px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,.12); }
+  .facts dt { color: rgba(255,255,255,.55); }
+  .facts dd { margin: 0; font-weight: 500; text-align: right; }
+  .contact .shell { background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); }
+  form.core { background: #fff; color: var(--ink); padding: 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  form h3 { grid-column: 1 / -1; font-size: 26px; letter-spacing: -.03em; font-weight: 600; margin-bottom: 4px; }
+  label { display: grid; gap: 8px; font-size: 14px; font-weight: 500; color: var(--mute); }
+  .full { grid-column: 1 / -1; }
+  input, select, textarea { font: 400 16px var(--body); color: var(--ink); background: var(--tile); border: 0; border-radius: 14px; padding: 15px 16px; width: 100%;
+                            box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .4s var(--ease), background .4s var(--ease); }
+  input:focus, select:focus, textarea:focus { outline: none; background: #fff; box-shadow: inset 0 0 0 2px var(--aqua); }
+  input.bad { box-shadow: inset 0 0 0 2px #C8553D; }
+  textarea { min-height: 110px; resize: vertical; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips label { display: inline-flex; }
+  .chips input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .chips span { padding: 10px 16px; border-radius: 999px; background: var(--tile); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font-size: 15px; cursor: pointer;
+                transition: background .4s var(--ease), color .4s var(--ease); }
+  .chips input:checked + span { background: var(--navy); color: #fff; box-shadow: none; }
+  .chips input:focus-visible + span { outline: 2px solid var(--aqua); outline-offset: 2px; }
+  .send { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+  .send small { color: var(--mute); font-size: 13px; }
+  .ok { grid-column: 1 / -1; display: none; padding: 14px 18px; border-radius: 14px; background: #E6F5EC; color: #1F5A35; font-weight: 500; }
+
+  footer { background: var(--abyss); color: rgba(255,255,255,.6); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; align-items: center; gap: 20px 40px; flex-wrap: wrap; padding-top: 36px;
+                 padding-bottom: calc(36px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(255,255,255,.1); }
+  footer img { height: 28px; width: auto; }
+
+  /* comparsa allo scorrimento: solo per ciò che parte sotto la piega */
+  .pre { transform: translateY(48px); opacity: 0; }
+  .in { transition: transform 1.1s var(--ease), opacity 1.1s var(--ease); }
+
+  @media (max-width: 1080px) {
+    .links a:not(.pill) { display: none; }
+    .bento { grid-template-columns: 1fr 1fr; }
+    .b-pool, .b-irr { grid-column: span 2; grid-row: auto; }
+    .b-care, .b-smart { grid-column: span 1; }
+    .b-fast { grid-column: span 2; }
+    .tilecard { min-height: 520px; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .contact .wrap { grid-template-columns: 1fr; gap: 48px; }
+  }
+  @media (max-width: 767px) {
+    section { padding: 88px 0; }
+    .island { padding: 6px 6px 6px 20px; }
+    .island .logo img { height: 26px; }
+    .links { display: none; }
+    .burger { display: block; }
+    .hero { min-height: 0; }
+    .hero > img { object-position: 60% 50%; }
+    .hero::after { background: linear-gradient(180deg, rgba(6,26,44,.55) 0%, rgba(6,26,44,.35) 30%, rgba(6,26,44,.55) 60%, rgba(6,26,44,.9) 100%); }
+    .hero .wrap { grid-template-columns: 1fr; gap: 28px; padding-top: calc(200px + env(safe-area-inset-top, 0px)); padding-bottom: 40px; }
+    .hero h1 { font-size: clamp(40px, 12.4vw, 72px); }
+    .hero .side { max-width: none; }
+    .intro { grid-template-columns: 1fr; gap: 20px; margin-bottom: 40px; }
+    .bento { grid-template-columns: 1fr; }
+    .b-pool, .b-irr, .b-care, .b-smart, .b-fast { grid-column: auto; }
+    .tilecard { min-height: 460px; }
+    .tilecard .txt { padding: 26px; }
+    .steps { grid-template-columns: 1fr; }
+    .steps .core { min-height: 0; }
+    .strip { grid-auto-columns: 80vw; }
+    .strip-nav { display: none; }
+    form.core { grid-template-columns: 1fr; padding: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .pre { transform: none; opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="island" id="island">
+  <a class="logo" href="#top" aria-label="Idra Tech, torna all'inizio"><img src="logo-bianco.svg" alt="Idra Tech"></a>
+  <nav class="links" aria-label="Principale">
+    <a href="#servizi">Servizi</a>
+    <a href="#metodo">Come lavoriamo</a>
+    <a href="#lavori">Lavori</a>
+    <a class="pill pill-aqua" href="#contatti">Sopralluogo gratuito<span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12 12 4M6 4h6v6"/></svg></span></a>
+  </nav>
+  <button class="burger" id="burger" aria-expanded="false" aria-controls="sheet" aria-label="Apri il menu"><span></span><span></span></button>
+</header>
+<div class="sheet" id="sheet" aria-hidden="true">
+  <a href="#servizi">Servizi</a>
+  <a href="#metodo">Come lavoriamo</a>
+  <a href="#lavori">Lavori</a>
+  <a href="#contatti">Contatti</a>
+  <a class="pill pill-aqua" href="#contatti">Sopralluogo gratuito<span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12 12 4M6 4h6v6"/></svg></span></a>
+  <small>+39 000 000 0000 · info@idratech.it</small>
+</div>
+
+<main id="top">
+  <section class="hero" style="padding:0">
+    <img src="photo-1783125127199-860da9744dcc.jpg" alt="Piscina davanti a una casa moderna, con il prato che arriva fino al bordo">
+    <div class="wrap">
+      <h1><span>Piscine</span><span>e irrigazione.</span></h1>
+      <div class="side">
+        <p>Costruiamo la piscina di casa e l'impianto che irriga il giardino. Un solo cantiere, un solo referente.</p>
+        <div class="row">
+          <a class="pill pill-white" href="#contatti">Richiedi un sopralluogo<span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12 12 4M6 4h6v6"/></svg></span></a>
+          <a class="ghost" href="#lavori">Guarda i lavori</a>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="ribbon"><div class="wrap">
+    <span><b>Dal 2009</b> in Veneto e Friuli</span>
+    <span><b>10 anni</b> di garanzia sulla vasca</span>
+    <span><b>48 ore</b> per un intervento in assistenza</span>
+  </div></div>
+
+  <section id="servizi">
+    <div class="wrap">
+      <div class="intro">
+        <h2>Due mestieri, un solo giardino.</h2>
+        <p>Piscina e irrigazione condividono tubi, scavi e centraline. Progettarle insieme costa meno e funziona meglio.</p>
+      </div>
+      <div class="bento">
+        <article class="shell b-pool"><div class="core tilecard">
+          <img src="photo-1717167398817-121e3c283dbb.jpg" alt="Piscina rettangolare con bordo in pietra accanto a una villa bianca" loading="lazy">
+          <div class="txt">
+            <h3>Piscine su misura</h3>
+            <p>Interrate in cemento armato, a skimmer o a sfioro. Scegli con noi forma, rivestimento e tecnologia.</p>
+            <div class="tags"><span>Mosaico e pietra</span><span>Elettrolisi a sale</span><span>Pompa di calore</span><span>Copertura automatica</span></div>
+          </div>
+        </div></article>
+        <article class="shell b-irr"><div class="core tilecard">
+          <img src="photo-1703243056931-265dbc9be205.jpg" alt="Irrigatori a scomparsa che bagnano un prato in controluce" loading="lazy">
+          <div class="txt">
+            <h3>Irrigazione automatica</h3>
+            <p>Ogni zona riceve l'acqua che le serve, all'ora giusta. Il prato resta verde e la bolletta scende.</p>
+            <div class="tags"><span>Irrigatori a scomparsa</span><span>Goccia per siepi e orti</span><span>Acqua piovana</span></div>
+          </div>
+        </div></article>
+        <article class="shell b-smart"><div class="core small">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="6" y="3" width="20" height="26" rx="4"/><path d="M16 9c0 0-4 5-4 7.5a4 4 0 0 0 8 0C20 14 16 9 16 9Z"/><path d="M12 24h8"/></svg>
+          <h3>Tutto dal telefono</h3>
+          <p>Centraline che seguono il meteo, pH e temperatura della vasca sotto controllo ovunque tu sia.</p>
+        </div></article>
+        <article class="shell b-care"><div class="core small">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="16" cy="16" r="12"/><path d="M16 9v7l5 3"/></svg>
+          <h3>Manutenzione</h3>
+          <p>Apertura in primavera, chiusura in autunno e visite ogni due settimane in stagione.</p>
+        </div></article>
+        <article class="shell b-fast"><div class="core small">
+          <span class="num">48 h</span>
+          <h3>Pronto intervento</h3>
+          <p>Una pompa ferma o una zona che non irriga: un tecnico arriva entro due giorni lavorativi.</p>
+        </div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="method" id="metodo">
+    <div class="wrap">
+      <div class="intro">
+        <h2>Dal sopralluogo al primo tuffo.</h2>
+        <p>Quattro passaggi, con tempi scritti nel contratto e la stessa persona che ti segue dall'inizio alla fine.</p>
+      </div>
+      <ol class="steps">
+        <li class="shell"><div class="core"><h3>Sopralluogo</h3><p>Veniamo da te, misuriamo il giardino e ascoltiamo cosa ti serve. È gratuito.</p></div></li>
+        <li class="shell"><div class="core"><h3>Progetto</h3><p>Disegni, rendering e un preventivo chiaro, voce per voce.</p></div></li>
+        <li class="shell"><div class="core"><h3>Cantiere</h3><p>Scavo, struttura, impianti e finiture, senza ditte diverse da coordinare.</p></div></li>
+        <li class="shell"><div class="core"><h3>Consegna</h3><p>Ti spieghiamo tutto e restiamo a disposizione per la manutenzione.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="work" id="lavori">
+    <div class="wrap">
+      <div class="intro">
+        <h2>Lavori recenti.</h2>
+        <div style="display:grid;gap:20px;justify-items:start">
+          <p>Piscine e giardini tra Padova, Treviso e Udine. <span class="note">Foto a titolo d'esempio.</span></p>
+          <div class="strip-nav"><button id="prev" aria-label="Lavori precedenti"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 3 5 8l5 5"/></svg></button><button id="next" aria-label="Lavori successivi"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="m6 3 5 5-5 5"/></svg></button></div>
+        </div>
+      </div>
+    </div>
+    <div class="strip" id="strip">
+      <figure class="shell"><div class="core"><img src="photo-1781795414968-8ece31826420.jpg" alt="Villa contemporanea con piscina e giardino" loading="lazy"><figcaption><b>Sfioro con solarium</b>Colli Euganei</figcaption></div></figure>
+      <figure class="shell"><div class="core"><img src="photo-1633109920432-4be4a0beae4b.jpg" alt="Piscina dalla forma libera nel prato" loading="lazy"><figcaption><b>Forma libera</b>Treviso</figcaption></div></figure>
+      <figure class="shell"><div class="core"><img src="photo-1787080181155-ada01ab07d53.jpg" alt="Irrigatori in un frutteto al tramonto" loading="lazy"><figcaption><b>Frutteto irrigato</b>Udine</figcaption></div></figure>
+      <figure class="shell"><div class="core"><img src="photo-1757356657991-c3fd6e2e812e.jpg" alt="Piscina illuminata al crepuscolo" loading="lazy"><figcaption><b>Luci LED</b>Padova</figcaption></div></figure>
+      <figure class="shell"><div class="core"><img src="photo-1780772415259-bda4359205a8.jpg" alt="Irrigatore in un giardino alberato" loading="lazy"><figcaption><b>Giardino a zone</b>Castelfranco</figcaption></div></figure>
+      <figure class="shell"><div class="core"><img src="photo-1760067537255-64d36262cb0a.jpg" alt="Piscina con area relax" loading="lazy"><figcaption><b>Area relax</b>Jesolo</figcaption></div></figure>
+    </div>
+  </section>
+
+  <section class="contact" id="contatti">
+    <div class="wrap">
+      <div>
+        <h2 class="h2">Parliamo del tuo giardino.</h2>
+        <p class="lead">Ti richiamiamo entro un giorno lavorativo per fissare il sopralluogo. Sopralluogo e preventivo sono gratuiti.</p>
+        <dl class="facts">
+          <div><dt>Telefono</dt><dd>+39 000 000 0000</dd></div>
+          <div><dt>Email</dt><dd>info@idratech.it</dd></div>
+          <div><dt>Sede</dt><dd>Via dell'Acqua 1, Padova</dd></div>
+          <div><dt>Orari</dt><dd>Lun–Ven, 8:00–18:00</dd></div>
+        </dl>
+      </div>
+      <div class="shell">
+        <form class="core" id="form" novalidate>
+          <h3>Richiedi il sopralluogo</h3>
+          <label>Nome e cognome<input id="nome" name="nome" autocomplete="name" required></label>
+          <label>Telefono<input id="tel" name="tel" type="tel" autocomplete="tel" required></label>
+          <div class="full" role="group" aria-labelledby="need" style="display:grid;gap:10px">
+            <span id="need" style="font-size:14px;font-weight:500;color:var(--mute)">Di cosa hai bisogno?</span>
+            <div class="chips">
+              <label><input type="checkbox" id="t-pool" name="tipo" value="piscina"><span>Piscina</span></label>
+              <label><input type="checkbox" id="t-irr" name="tipo" value="irrigazione"><span>Irrigazione</span></label>
+              <label><input type="checkbox" id="t-care" name="tipo" value="manutenzione"><span>Manutenzione</span></label>
+            </div>
+          </div>
+          <label>Comune<input id="comune" name="comune" autocomplete="address-level2"></label>
+          <label>Quando vorresti iniziare?<select id="quando" name="quando"><option>Entro 3 mesi</option><option>Entro l'anno</option><option>Sto valutando</option></select></label>
+          <label class="full">Messaggio<textarea id="msg" name="msg" placeholder="Dimensioni del giardino, idee, foto che ti piacciono"></textarea></label>
+          <div class="send"><small>Usiamo i tuoi dati solo per ricontattarti.</small>
+            <button class="pill pill-navy" type="submit">Richiedi il sopralluogo<span class="ic"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 12 12 4M6 4h6v6"/></svg></span></button></div>
+          <p class="ok" id="ok" role="status">Richiesta inviata. Ti richiamiamo entro un giorno lavorativo.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <img src="logo-bianco.svg" alt="Idra Tech">
+    <span>Idra Tech S.r.l. · P. IVA 00000000000 · Padova</span>
+    <span>Foto: Unsplash</span>
+  </div>
+</footer>
+
+<script>
+  const body = document.body, burger = document.getElementById('burger'), sheet = document.getElementById('sheet'), island = document.getElementById('island');
+  const setMenu = open => { body.classList.toggle('menu-open', open); burger.setAttribute('aria-expanded', open); sheet.setAttribute('aria-hidden', !open);
+    burger.setAttribute('aria-label', open ? 'Chiudi il menu' : 'Apri il menu'); body.style.overflow = open ? 'hidden' : ''; };
+  burger.addEventListener('click', () => setMenu(!body.classList.contains('menu-open')));
+  sheet.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+  addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+
+  // la navigazione diventa piena quando si lascia la foto d'apertura
+  new IntersectionObserver(([e]) => island.classList.toggle('solid', !e.isIntersecting), { rootMargin: '-80px 0px 0px 0px' })
+    .observe(document.querySelector('.hero'));
+
+  // comparsa: solo per gli elementi sotto la piega al caricamento, così la prima schermata è sempre completa
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); e.target.classList.remove('pre'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.intro, .bento > *, .steps > *, .strip figure, .contact .wrap > *').forEach((el, i) => {
+      if (el.getBoundingClientRect().top > innerHeight) { el.classList.add('pre'); el.style.transitionDelay = (i % 3) * 70 + 'ms'; io.observe(el); }
+    });
+  }
+
+  const strip = document.getElementById('strip'), step = () => strip.querySelector('figure').offsetWidth + 16;
+  document.getElementById('prev').addEventListener('click', () => strip.scrollBy({ left: -step(), behavior: 'smooth' }));
+  document.getElementById('next').addEventListener('click', () => strip.scrollBy({ left: step(), behavior: 'smooth' }));
+
+  document.getElementById('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const f = e.target, req = [f.nome, f.tel];
+    req.forEach(i => i.classList.toggle('bad', !i.value.trim()));
+    const miss = req.find(i => !i.value.trim()); if (miss) { miss.focus(); return; }
+    document.getElementById('ok').style.display = 'block';
+    f.querySelector('button').firstChild.textContent = 'Richiesta inviata';
+  });
+</script>
+</body>
+</html>
